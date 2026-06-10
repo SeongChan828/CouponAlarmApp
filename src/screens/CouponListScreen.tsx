@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
-  StyleSheet, SafeAreaView, StatusBar, ActivityIndicator,
+  StyleSheet, SafeAreaView, StatusBar, ActivityIndicator, Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -13,6 +13,7 @@ import { getAllCoupons } from '../services/couponStorage';
 import CouponCard from '../components/CouponCard';
 import EmptyState from '../components/EmptyState';
 import UrgentBanner from '../components/UrgentBanner';
+import AddCouponBottomSheet from '../components/AddCouponBottomSheet';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CouponList'>;
 type FilterTab = 'all' | 'available' | 'used';
@@ -24,20 +25,17 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function CouponListScreen({ navigation }: Props) {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [coupons, setCoupons]           = useState<Coupon[]>([]);
+  const [loading, setLoading]           = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const [sheetVisible, setSheetVisible] = useState(false);
 
-  // 화면 포커스될 때마다 최신 데이터 로드
   useFocusEffect(
     useCallback(() => {
       let active = true;
       setLoading(true);
       getAllCoupons().then(data => {
-        if (active) {
-          setCoupons(data);
-          setLoading(false);
-        }
+        if (active) { setCoupons(data); setLoading(false); }
       });
       return () => { active = false; };
     }, []),
@@ -47,19 +45,46 @@ export default function CouponListScreen({ navigation }: Props) {
 
   const filteredCoupons = (() => {
     let list = coupons;
-    if (activeFilter === 'available') {
+    if (activeFilter === 'available')
       list = coupons.filter(c => c.status === 'available' || c.status === 'expiringSoon');
-    } else if (activeFilter === 'used') {
+    else if (activeFilter === 'used')
       list = coupons.filter(c => c.status === 'used' || c.status === 'expired');
-    }
     return sortCouponsByExpiry(list);
   })();
+
+  const handleSelectCamera = () => {
+    setSheetVisible(false);
+    Alert.alert(
+      '📷 사진으로 인식',
+      'OCR 기능은 준비 중이에요.\n직접 입력으로 등록해주세요.',
+      [
+        { text: '취소', style: 'cancel' },
+        { text: '직접 입력으로 이동', onPress: () => navigation.navigate('CouponCreate') },
+      ],
+    );
+  };
+
+  const handleSelectGallery = () => {
+    setSheetVisible(false);
+    Alert.alert(
+      '🖼️ 갤러리에서 선택',
+      'OCR 기능은 준비 중이에요.\n직접 입력으로 등록해주세요.',
+      [
+        { text: '취소', style: 'cancel' },
+        { text: '직접 입력으로 이동', onPress: () => navigation.navigate('CouponCreate') },
+      ],
+    );
+  };
+
+  const handleSelectManual = () => {
+    setSheetVisible(false);
+    setTimeout(() => navigation.navigate('CouponCreate'), 150);
+  };
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
 
-      {/* 헤더 */}
       <View style={styles.header}>
         <View>
           <Text style={styles.headerEyebrow}>POSITIVE COUPON</Text>
@@ -106,17 +131,30 @@ export default function CouponListScreen({ navigation }: Props) {
               </View>
             </>
           }
-          ListEmptyComponent={<EmptyState onAdd={() => navigation.navigate('CouponCreate')} />}
+          ListEmptyComponent={<EmptyState onAdd={() => setSheetVisible(true)} />}
           renderItem={({ item }) => (
             <CouponCard coupon={item} onPress={c => navigation.navigate('CouponDetail', { couponId: c.id })} />
           )}
         />
       )}
 
-      {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('CouponCreate')} activeOpacity={0.85}>
+      {/* FAB — 바텀시트 열기 */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setSheetVisible(true)}
+        activeOpacity={0.85}
+      >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
+
+      {/* 등록 방법 선택 바텀시트 */}
+      <AddCouponBottomSheet
+        visible={sheetVisible}
+        onClose={() => setSheetVisible(false)}
+        onSelectCamera={handleSelectCamera}
+        onSelectGallery={handleSelectGallery}
+        onSelectManual={handleSelectManual}
+      />
     </SafeAreaView>
   );
 }
@@ -139,6 +177,13 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: { fontSize: 13, fontWeight: '700', color: Colors.ink, letterSpacing: 0.5 },
   sectionCount: { fontSize: 12, color: Colors.inkSoft },
-  fab: { position: 'absolute', right: 20, bottom: 32, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.ink, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.line, shadowColor: Colors.line, shadowOffset: { width: 3, height: 3 }, shadowOpacity: 1, shadowRadius: 0, elevation: 6 },
+  fab: {
+    position: 'absolute', right: 20, bottom: 32,
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: Colors.ink, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: Colors.line,
+    shadowColor: Colors.line, shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1, shadowRadius: 0, elevation: 6,
+  },
   fabText: { fontSize: 28, fontWeight: '300', color: Colors.background, lineHeight: 32 },
 });
