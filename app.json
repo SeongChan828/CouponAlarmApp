@@ -31,7 +31,8 @@
       }
     },
     "plugins": [
-      "expo-notifications"
+      "expo-notifications",
+      "expo-asset"
     ]
   }
 }
