@@ -60,14 +60,26 @@ export default function CouponListScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
 
+      {/* ── 헤더 ── */}
       <View style={styles.header}>
         <View>
           <Text style={styles.headerEyebrow}>POSITIVE COUPON</Text>
           <Text style={styles.headerTitle}>내 쿠폰</Text>
         </View>
-        <View style={styles.bellWrapper}>
-          <View style={styles.bell} />
-          {urgentCoupons.length > 0 && <View style={styles.bellDot} />}
+        <View style={styles.headerRight}>
+          {/* 위치 알림 버튼 */}
+          <TouchableOpacity
+            style={styles.iconBtn}
+            onPress={() => navigation.navigate('LocationAlert')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>📍</Text>
+          </TouchableOpacity>
+          {/* 알림 벨 */}
+          <View style={styles.bellWrapper}>
+            <View style={styles.bell} />
+            {urgentCoupons.length > 0 && <View style={styles.bellDot} />}
+          </View>
         </View>
       </View>
 
@@ -129,23 +141,26 @@ export default function CouponListScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
+  safe:        { flex: 1, backgroundColor: Colors.background },
+  header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 12 },
   headerEyebrow: { fontSize: 10, letterSpacing: 3, color: Colors.coral, fontWeight: '600', marginBottom: 2 },
   headerTitle: { fontSize: 28, fontWeight: '800', color: Colors.ink, letterSpacing: -0.5 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  iconBtn:     { width: 36, height: 36, borderRadius: 8, borderWidth: 1.5, borderColor: Colors.line, backgroundColor: Colors.card, alignItems: 'center', justifyContent: 'center' },
+  iconBtnText: { fontSize: 18 },
   bellWrapper: { position: 'relative', width: 36, height: 36 },
-  bell: { width: 36, height: 36, borderRadius: 8, borderWidth: 1.5, borderColor: Colors.line, backgroundColor: Colors.card },
-  bellDot: { position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.coral, borderWidth: 1.5, borderColor: Colors.line },
+  bell:        { width: 36, height: 36, borderRadius: 8, borderWidth: 1.5, borderColor: Colors.line, backgroundColor: Colors.card },
+  bellDot:     { position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: 5, backgroundColor: Colors.coral, borderWidth: 1.5, borderColor: Colors.line },
   loadingWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   listContent: { paddingHorizontal: 20, paddingBottom: 100 },
-  filterRow: { flexDirection: 'row', gap: 8, marginBottom: 20 },
-  filterTab: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.line, backgroundColor: Colors.card },
-  filterTabActive: { backgroundColor: Colors.ink },
-  filterTabText: { fontSize: 12, fontWeight: '600', color: Colors.inkSoft },
+  filterRow:   { flexDirection: 'row', gap: 8, marginBottom: 20 },
+  filterTab:   { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1.5, borderColor: Colors.line, backgroundColor: Colors.card },
+  filterTabActive:     { backgroundColor: Colors.ink },
+  filterTabText:       { fontSize: 12, fontWeight: '600', color: Colors.inkSoft },
   filterTabTextActive: { color: Colors.background },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', color: Colors.ink, letterSpacing: 0.5 },
-  sectionCount: { fontSize: 12, color: Colors.inkSoft },
+  sectionTitle:  { fontSize: 13, fontWeight: '700', color: Colors.ink, letterSpacing: 0.5 },
+  sectionCount:  { fontSize: 12, color: Colors.inkSoft },
   fab: { position: 'absolute', right: 20, bottom: 32, width: 56, height: 56, borderRadius: 28, backgroundColor: Colors.ink, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: Colors.line, shadowColor: Colors.line, shadowOffset: { width: 3, height: 3 }, shadowOpacity: 1, shadowRadius: 0, elevation: 6 },
   fabText: { fontSize: 28, fontWeight: '300', color: Colors.background, lineHeight: 32 },
 });
